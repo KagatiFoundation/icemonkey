@@ -2,29 +2,29 @@ import { useState } from "react";
 import axios from "axios";
 
 export default function SearchPage() {
-const [query, setQuery] = useState("");
-const [results, setResults] = useState([]);
-const [loading, setLoading] = useState(false);
-const [error, setError] = useState(null);
+    const [query, setQuery] = useState("");
+    const [department, setDepartment] = useState(null);
+    const [results, setResults] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-const handleSearch = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setResults([]);
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+        setResults([]);
 
-    try {
-        const response = await axios.get(`http://localhost:8080/search?q=${encodeURIComponent(query)}`);
-        // Convert the numeric-key object into an array
-        const resArray = Object.keys(response.data)
-                               .map(key => response.data[key]);
-        setResults(resArray);
-    } catch (err) {
-        setError("Failed to fetch results.");
-    } finally {
-        setLoading(false);
-    }
-};
+        try {
+            // Include department in query parameters
+            const response = await axios.get(`http://localhost:8080/search?q=${encodeURIComponent(query)}&m=${encodeURIComponent(department)}`);
+            const resArray = Object.keys(response.data).map(key => response.data[key]);
+            setResults(resArray);
+        } catch (err) {
+            setError("Failed to fetch results.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
 return (
     <div style={styles.container}>
@@ -38,6 +38,19 @@ return (
                 onChange={(e) => setQuery(e.target.value)}
                 style={styles.input}
             />
+
+            <select
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                style={styles.select}
+            >
+                <option value="" selected>All</option>
+                <option value="mofa">Ministry of Foreign Affairs</option>
+                <option value="moha">Ministry of Home Affairs</option>
+                <option value="doe">Department of Education</option>
+                <option value="moe">Ministry of Education</option>
+            </select>
+
             <button type="submit" style={styles.button}>Search</button>
         </form>
 
@@ -89,6 +102,15 @@ padding: "12px 20px",
 border: "none",
 outline: "none",
 fontSize: "1rem",
+},
+select: {
+padding: "12px 16px",
+border: "none",
+outline: "none",
+fontSize: "1rem",
+cursor: "pointer",
+backgroundColor: "#fff",
+color: "#333",
 },
 button: {
 padding: "12px 20px",
